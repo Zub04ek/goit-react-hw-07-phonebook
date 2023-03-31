@@ -7,8 +7,9 @@ import {
   ErrorMessage,
   SubmitButton,
 } from './ContactForm.styled';
-import { useDispatch } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/operations';
+import { selectItems } from 'redux/selectors';
 
 const initialValues = {
   name: '',
@@ -22,9 +23,20 @@ const schema = yup.object().shape({
 
 export const ContactForm = () => {
   const dispatch = useDispatch();
+  const contacts = useSelector(selectItems);
 
   const handleSubmit = (values, { resetForm }) => {
-    dispatch(addContact(values.name, values.number));
+    const isAlreadyInContacts = contacts.some(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
+    if (isAlreadyInContacts) {
+      alert(`${values.name} is already in contacts.`);
+      resetForm();
+      return;
+    }
+
+    dispatch(addContact({ name: values.name, phone: values.number }));
     resetForm();
   };
 
